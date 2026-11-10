@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" aria-hidden="true">
+  <defs>
+    <linearGradient id="metal" x1="40" y1="20" x2="160" y2="180" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7a7a7a"/>
+      <stop offset="0.45" stop-color="#2a2a2a"/>
+      <stop offset="0.55" stop-color="#111"/>
+      <stop offset="1" stop-color="#8a8a8a"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="20" y1="20" x2="180" y2="180" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9a9a9a"/>
+      <stop offset="0.5" stop-color="#333"/>
+      <stop offset="1" stop-color="#6a6a6a"/>
+    </linearGradient>
+  </defs>
+  <circle cx="100" cy="100" r="92" stroke="url(#rim)" stroke-width="2" opacity="0.9"/>
+  <circle cx="100" cy="100" r="84" stroke="#444" stroke-width="1" opacity="0.7"/>
+  <circle cx="100" cy="100" r="76" stroke="#2a2a2a" stroke-width="6"/>
+  <path d="M100 28 L112 48 L100 42 L88 48 Z M172 100 L152 112 L158 100 L152 88 Z M100 172 L88 152 L100 158 L112 152 Z M28 100 L48 88 L42 100 L48 112 Z" fill="#555" opacity="0.55"/>
+  <path d="M62 72 C62 52 78 42 100 42 C122 42 138 54 138 74 C138 90 128 98 112 104 L138 148 H118 L96 112 H86 V148 H62 V72 Z M86 72 V96 H100 C110 96 116 90 116 80 C116 70 110 64 100 64 H86 Z" fill="url(#metal)"/>
+  <path d="M70 58 A48 48 0 0 1 130 58" stroke="#666" stroke-width="0.8" opacity="0.5"/>
+  <path d="M70 142 A48 48 0 0 0 130 142" stroke="#666" stroke-width="0.8" opacity="0.5"/>
+</svg>

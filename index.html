@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="CyberEquities owns 2,500+ premium domains. Private portfolio of digital equities."
+    />
+    <meta name="theme-color" content="#000000" />
+    <title>CyberEquities</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="icon" href="assets/mark.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <div class="atmosphere" aria-hidden="true">
+      <div class="atmosphere__noise"></div>
+    </div>
+
+    <div class="site">
+      <header class="topbar">
+        <a class="brand" href="#top" aria-label="CyberEquities home">
+          <img class="brand__mark" src="assets/mark.svg" alt="" width="22" height="22" />
+          <span class="brand__word">
+            <span class="brand__cyber">Cyber</span><span class="brand__eq">Equities</span>
+          </span>
+        </a>
+        <nav class="topnav" aria-label="Primary">
+          <a href="#holdings">Holdings</a>
+          <a href="#inquire">Inquire</a>
+        </nav>
+      </header>
+
+      <div class="ticker ticker--top" aria-hidden="true">
+        <div class="ticker__fade ticker__fade--left"></div>
+        <div class="ticker__fade ticker__fade--right"></div>
+        <div class="ticker__track" data-ticker></div>
+      </div>
+
+      <main id="top">
+        <section class="hero" aria-labelledby="hero-title">
+          <div class="hero__inner">
+            <img class="hero__mark" src="assets/mark-hero.svg" alt="" width="64" height="64" />
+            <p class="hero__eyebrow"><span class="hero__pulse"></span> Private ledger</p>
+            <h1 id="hero-title" class="hero__title">
+              <span class="hero__title-cyber">Cyber</span><span class="hero__title-eq">Equities</span>
+            </h1>
+            <p class="hero__lede">
+              We own <strong>2,500+</strong> premium domains.<br />
+              Quiet capital — available by private inquiry only.
+            </p>
+            <div class="hero__cta">
+              <a class="btn btn--primary" href="#holdings">Browse featured</a>
+              <a class="btn btn--ghost" href="#inquire">Request access</a>
+            </div>
+            <div class="hero__stats" aria-label="Portfolio scale">
+              <div class="stat">
+                <span class="stat__value">2,500+</span>
+                <span class="stat__label">Domains owned</span>
+              </div>
+              <div class="stat">
+                <span class="stat__value" id="hero-count">27</span>
+                <span class="stat__label">Featured here</span>
+              </div>
+              <div class="stat">
+                <span class="stat__value">Private</span>
+                <span class="stat__label">Inquiry only</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="ticker ticker--band" aria-label="Live holdings ticker">
+          <div class="ticker__fade ticker__fade--left"></div>
+          <div class="ticker__fade ticker__fade--right"></div>
+          <div class="ticker__track ticker__track--slow" data-ticker data-reverse></div>
+        </div>
+
+        <section class="holdings" id="holdings" aria-labelledby="holdings-title">
+          <header class="holdings__head">
+            <p class="holdings__kicker">Featured selection</p>
+            <h2 id="holdings-title" class="section-title">Holdings</h2>
+            <p class="section-lede">
+              A curated look into our <strong>2,500+</strong> domain portfolio. Press Inquire to
+              place a private offer.
+            </p>
+            <div class="holdings__bar">
+              <span class="holdings__chip holdings__chip--signal">2,500+ owned</span>
+            </div>
+          </header>
+          <div class="holdings__panel">
+            <div class="holdings__grid" id="holdings-grid"></div>
+          </div>
+        </section>
+
+        <section class="inquire" id="inquire" aria-labelledby="inquire-title">
+          <div class="inquire__inner">
+            <h2 id="inquire-title" class="section-title">Private channel</h2>
+            <p class="section-lede">
+              Looking beyond the featured list? With 2,500+ names in inventory, ask us what else
+              fits.
+            </p>
+            <a
+              class="btn btn--primary btn--signal"
+              href="mailto:inquire@cyberequities.com?subject=Private%20Inquiry"
+            >
+              Email CyberEquities
+            </a>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <p>CyberEquities.com · 2,500+ domains</p>
+      </footer>
+    </div>
+
+    <script type="module" src="js/vault.js"></script>
+  </body>
+</html>
