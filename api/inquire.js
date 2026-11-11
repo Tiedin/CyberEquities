@@ -152,30 +152,36 @@ module.exports = async (req, res) => {
       }),
     });
 
-    const data = await upstream.json().catch(() => ({}));
-    const msg = String(data.message || "");
+    const raw = await upstream.text();
+    let data = {};
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      data = { message: raw.slice(0, 300) };
+    }
+    const msg = String(data.message || data.error || "");
+
+    if (/activat/i.test(msg)) {
+      bad(
+        res,
+        503,
+        "Inbox setup pending: open inquire@cyberequities.com and click FormSubmit’s Activate Form link, then try again."
+      );
+      return;
+    }
 
     if (!upstream.ok || data.success === false || data.success === "false") {
-      if (/activat/i.test(msg)) {
-        bad(
-          res,
-          503,
-          "Inbox setup pending: open inquire@cyberequities.com and click FormSubmit’s Activate Form link, then try again."
-        );
-        return;
-      }
-      bad(res, 502, msg || "Could not send right now. Try again.");
+      bad(res, 502, msg || `Email provider error (${upstream.status})`);
       return;
     }
 
-    if (!isTruthySuccess(data) && !msg.toLowerCase().includes("thank")) {
-      // Some FormSubmit responses only return a thank-you string
-      bad(res, 502, msg || "Could not send right now. Try again.");
+    if (isTruthySuccess(data) || /thank|sent|ok/i.test(msg) || upstream.ok) {
+      ok(res);
       return;
     }
 
-    ok(res);
-  } catch {
-    bad(res, 502, "Could not send right now. Try again.");
+    bad(res, 502, msg || "Could not send right now. Try again.");
+  } catch (err) {
+    bad(res, 502, err.message || "Could not send right now. Try again.");
   }
 };
