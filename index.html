@@ -15,7 +15,7 @@
       href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/styles.css?v=11" />
+    <link rel="stylesheet" href="css/styles.css?v=12" />
     <link rel="icon" href="assets/mark.svg?v=7" type="image/svg+xml" />
   </head>
   <body>
@@ -108,12 +108,23 @@
               Looking beyond the featured list? With 2,500+ names in inventory, ask us what else
               fits.
             </p>
-            <a
-              class="btn btn--primary btn--signal"
-              href="mailto:inquire@cyberequities.com?subject=Private%20Inquiry"
-            >
-              Email CyberEquities
-            </a>
+            <form class="inquire-form" id="general-inquire" novalidate>
+              <label class="field">
+                <span class="field__label">Name</span>
+                <input class="field__input" name="name" type="text" autocomplete="name" required placeholder="Alex Rivera" />
+              </label>
+              <label class="field">
+                <span class="field__label">Email</span>
+                <input class="field__input" name="email" type="email" autocomplete="email" required placeholder="alex@company.com" />
+              </label>
+              <label class="field">
+                <span class="field__label">Message</span>
+                <textarea class="field__input field__input--area" name="message" rows="3" required placeholder="What are you looking for?"></textarea>
+              </label>
+              <input class="hp" name="company" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" />
+              <p class="inquire-form__status" id="general-inquire-status" hidden></p>
+              <button type="submit" class="btn btn--primary btn--signal inquire-form__submit">Send inquiry</button>
+            </form>
           </div>
         </section>
       </main>
@@ -123,6 +134,6 @@
       </footer>
     </div>
 
-    <script type="module" src="js/vault.js?v=6"></script>
+    <script type="module" src="js/vault.js?v=7"></script>
   </body>
 </html>

@@ -1,4 +1,5 @@
 import { domains, displayName, shortName } from "./domains.js";
+import { sendInquire } from "./send-inquire.js";
 
 const total = domains.length;
 const grid = document.querySelector("#holdings-grid");
@@ -41,10 +42,6 @@ function formHTML(d) {
           <span class="field__label">Email</span>
           <input class="field__input" name="email" type="email" autocomplete="email" required placeholder="alex@company.com" />
         </label>
-        <label class="field">
-          <span class="field__label">Phone</span>
-          <input class="field__input" name="phone" type="tel" autocomplete="tel" required placeholder="+1 (555) 000-0000" />
-        </label>
         <label class="field field--offer">
           <span class="field__label">Your offer (USD)</span>
           <div class="field__offer-wrap">
@@ -52,11 +49,13 @@ function formHTML(d) {
             <input class="field__input field__input--offer" name="offer" type="text" inputmode="decimal" required placeholder="0" />
           </div>
         </label>
+        <input class="hp" name="company" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" />
+        <p class="sheet__status" data-status hidden></p>
       </div>
 
       <footer class="sheet__foot">
         <button type="button" class="btn btn--ghost sheet__cancel">Cancel</button>
-        <button type="submit" class="btn btn--primary btn--signal sheet__submit">Send private offer</button>
+        <button type="submit" class="btn btn--primary btn--signal sheet__submit">Send offer</button>
       </footer>
     </form>
   `;
@@ -134,42 +133,52 @@ function openInquire(index) {
 
   closeBtns.forEach((btn) => btn.addEventListener("click", () => closeOpenRow()));
 
-  form?.addEventListener("submit", (e) => {
+  form?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const data = new FormData(form);
     const name = String(data.get("name") || "").trim();
     const email = String(data.get("email") || "").trim();
-    const phone = String(data.get("phone") || "").trim();
     const offer = String(data.get("offer") || "").trim();
-    if (!name || !email || !phone || !offer) {
+    const company = String(data.get("company") || "").trim();
+    if (!name || !email || !offer) {
       form.reportValidity();
       return;
     }
 
-    const subject = encodeURIComponent(`Offer: ${d.name}`);
-    const body = encodeURIComponent(
-      [
-        `Domain: ${d.name}`,
-        "",
-        `Name: ${name}`,
-        `Email: ${email}`,
-        `Phone: ${phone}`,
-        `Offer (USD): ${offer}`,
-      ].join("\n")
-    );
-    window.location.href = `mailto:inquire@cyberequities.com?subject=${subject}&body=${body}`;
+    const submit = form.querySelector(".sheet__submit");
+    const status = form.querySelector("[data-status]");
+    if (submit) {
+      submit.disabled = true;
+      submit.textContent = "Sending…";
+    }
+    if (status) {
+      status.hidden = true;
+      status.textContent = "";
+    }
 
-    formWrap.innerHTML = `
-      <div class="sheet sheet--done">
-        <div class="sheet__done-icon" aria-hidden="true">✓</div>
-        <p class="sheet__done-title">Offer ready</p>
-        <p class="sheet__done-copy">Your mail client should open with the offer for <strong>${displayName(d.name)}</strong>.</p>
-        <button type="button" class="btn btn--primary btn--signal sheet__done-close">Back to holdings</button>
-      </div>
-    `;
-    formWrap
-      .querySelector(".sheet__done-close")
-      ?.addEventListener("click", () => closeOpenRow());
+    try {
+      await sendInquire({ name, email, offer, domain: d.name, company });
+      formWrap.innerHTML = `
+        <div class="sheet sheet--done">
+          <div class="sheet__done-icon" aria-hidden="true">✓</div>
+          <p class="sheet__done-title">Offer sent</p>
+          <p class="sheet__done-copy">We’ll reply by email about <strong>${displayName(d.name)}</strong>.</p>
+          <button type="button" class="btn btn--primary btn--signal sheet__done-close">Back to holdings</button>
+        </div>
+      `;
+      formWrap
+        .querySelector(".sheet__done-close")
+        ?.addEventListener("click", () => closeOpenRow());
+    } catch (err) {
+      if (status) {
+        status.hidden = false;
+        status.textContent = err.message || "Could not send. Try again.";
+      }
+      if (submit) {
+        submit.disabled = false;
+        submit.textContent = "Send offer";
+      }
+    }
   });
 
   requestAnimationFrame(() => {
@@ -191,10 +200,62 @@ function buildHoldings() {
   });
 }
 
+function bindGeneralInquire() {
+  const form = document.querySelector("#general-inquire");
+  if (!form) return;
+  const status = document.querySelector("#general-inquire-status");
+  const submit = form.querySelector(".inquire-form__submit");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const data = new FormData(form);
+    const name = String(data.get("name") || "").trim();
+    const email = String(data.get("email") || "").trim();
+    const message = String(data.get("message") || "").trim();
+    const company = String(data.get("company") || "").trim();
+    if (!name || !email || !message) {
+      form.reportValidity();
+      return;
+    }
+
+    if (submit) {
+      submit.disabled = true;
+      submit.textContent = "Sending…";
+    }
+    if (status) {
+      status.hidden = true;
+      status.classList.remove("is-error", "is-ok");
+      status.textContent = "";
+    }
+
+    try {
+      await sendInquire({ name, email, message, company });
+      form.reset();
+      if (status) {
+        status.hidden = false;
+        status.classList.add("is-ok");
+        status.textContent = "Sent. We’ll reply by email.";
+      }
+    } catch (err) {
+      if (status) {
+        status.hidden = false;
+        status.classList.add("is-error");
+        status.textContent = err.message || "Could not send. Try again.";
+      }
+    } finally {
+      if (submit) {
+        submit.disabled = false;
+        submit.textContent = "Send inquiry";
+      }
+    }
+  });
+}
+
 function init() {
   if (heroCount) heroCount.textContent = String(total);
   buildTickers();
   buildHoldings();
+  bindGeneralInquire();
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeOpenRow();
