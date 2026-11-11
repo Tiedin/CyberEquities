@@ -1,5 +1,9 @@
+/**
+ * Optional server path when RESEND_API_KEY is set on Vercel.
+ * Browser forms use FormSubmit directly (see js/send-inquire.js) because
+ * FormSubmit blocks Vercel serverless IPs via Cloudflare.
+ */
 const TO = "inquire@cyberequities.com";
-const SITE = "https://cyberequities.com";
 
 function bad(res, status, error) {
   res.statusCode = status;
@@ -7,10 +11,10 @@ function bad(res, status, error) {
   res.end(JSON.stringify({ ok: false, error }));
 }
 
-function ok(res, extra = {}) {
+function ok(res) {
   res.statusCode = 200;
   res.setHeader("Content-Type", "application/json");
-  res.end(JSON.stringify({ ok: true, ...extra }));
+  res.end(JSON.stringify({ ok: true }));
 }
 
 function readBody(req) {
@@ -34,10 +38,6 @@ function readBody(req) {
   });
 }
 
-function isTruthySuccess(data) {
-  return data && (data.success === true || data.success === "true");
-}
-
 module.exports = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -54,6 +54,15 @@ module.exports = async (req, res) => {
     return;
   }
 
+  if (!process.env.RESEND_API_KEY) {
+    bad(
+      res,
+      501,
+      "Server email is not configured. The site form sends via FormSubmit in the browser."
+    );
+    return;
+  }
+
   let body;
   try {
     body = await readBody(req);
@@ -62,7 +71,6 @@ module.exports = async (req, res) => {
     return;
   }
 
-  // Honeypot — bots fill this; humans never see it
   if (body.company) {
     ok(res);
     return;
@@ -75,18 +83,8 @@ module.exports = async (req, res) => {
   const offer = String(body.offer || "").trim();
   const domain = String(body.domain || "").trim();
 
-  if (!name || !email) {
-    bad(res, 400, "Name and email are required");
-    return;
-  }
-
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    bad(res, 400, "Enter a valid email");
-    return;
-  }
-
-  if (!message && !offer) {
-    bad(res, 400, "Add a short message or offer");
+  if (!name || !email || (!message && !offer)) {
+    bad(res, 400, "Name, email, and a message or offer are required");
     return;
   }
 
@@ -103,84 +101,27 @@ module.exports = async (req, res) => {
     message ? `Message:\n${message}` : null,
   ].filter(Boolean);
 
-  // Prefer Resend when configured; otherwise FormSubmit
-  if (process.env.RESEND_API_KEY) {
-    try {
-      const upstream = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from: process.env.RESEND_FROM || "CyberEquities <onboarding@resend.dev>",
-          to: [TO],
-          reply_to: email,
-          subject,
-          text: lines.join("\n"),
-        }),
-      });
-      const data = await upstream.json().catch(() => ({}));
-      if (!upstream.ok) {
-        bad(res, 502, data.message || "Could not send right now. Try again.");
-        return;
-      }
-      ok(res);
-      return;
-    } catch {
-      bad(res, 502, "Could not send right now. Try again.");
-      return;
-    }
-  }
-
   try {
-    const upstream = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(TO)}`, {
+    const upstream = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
+        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
         "Content-Type": "application/json",
-        Accept: "application/json",
-        Origin: SITE,
-        Referer: `${SITE}/`,
       },
       body: JSON.stringify({
-        name,
-        email,
-        _replyto: email,
-        _subject: subject,
-        _template: "table",
-        message: lines.join("\n"),
+        from: process.env.RESEND_FROM || "CyberEquities <onboarding@resend.dev>",
+        to: [TO],
+        reply_to: email,
+        subject,
+        text: lines.join("\n"),
       }),
     });
-
-    const raw = await upstream.text();
-    let data = {};
-    try {
-      data = JSON.parse(raw);
-    } catch {
-      data = { message: raw.slice(0, 300) };
-    }
-    const msg = String(data.message || data.error || "");
-
-    if (/activat/i.test(msg)) {
-      bad(
-        res,
-        503,
-        "Inbox setup pending: open inquire@cyberequities.com and click FormSubmit’s Activate Form link, then try again."
-      );
+    const data = await upstream.json().catch(() => ({}));
+    if (!upstream.ok) {
+      bad(res, 502, data.message || "Could not send right now. Try again.");
       return;
     }
-
-    if (!upstream.ok || data.success === false || data.success === "false") {
-      bad(res, 502, msg || `Email provider error (${upstream.status})`);
-      return;
-    }
-
-    if (isTruthySuccess(data) || /thank|sent|ok/i.test(msg) || upstream.ok) {
-      ok(res);
-      return;
-    }
-
-    bad(res, 502, msg || "Could not send right now. Try again.");
+    ok(res);
   } catch (err) {
     bad(res, 502, err.message || "Could not send right now. Try again.");
   }
