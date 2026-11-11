@@ -12,11 +12,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/styles.css" />
-    <link rel="icon" href="assets/mark.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="css/styles.css?v=11" />
+    <link rel="icon" href="assets/mark.svg?v=7" type="image/svg+xml" />
   </head>
   <body>
     <div class="atmosphere" aria-hidden="true">
@@ -26,7 +26,7 @@
     <div class="site">
       <header class="topbar">
         <a class="brand" href="#top" aria-label="CyberEquities home">
-          <img class="brand__mark" src="assets/mark.svg" alt="" width="22" height="22" />
+          <img class="brand__mark" src="assets/mark.svg?v=7" alt="" width="22" height="22" />
           <span class="brand__word">
             <span class="brand__cyber">Cyber</span><span class="brand__eq">Equities</span>
           </span>
@@ -46,7 +46,7 @@
       <main id="top">
         <section class="hero" aria-labelledby="hero-title">
           <div class="hero__inner">
-            <img class="hero__mark" src="assets/mark-hero.svg" alt="" width="64" height="64" />
+            <img class="hero__mark" src="assets/mark-hero.svg?v=7" alt="" width="64" height="64" />
             <p class="hero__eyebrow"><span class="hero__pulse"></span> Private ledger</p>
             <h1 id="hero-title" class="hero__title">
               <span class="hero__title-cyber">Cyber</span><span class="hero__title-eq">Equities</span>
@@ -55,6 +55,7 @@
               We own <strong>2,500+</strong> premium domains.<br />
               Quiet capital — available by private inquiry only.
             </p>
+            <p class="hero__worth">Worth over <span>$5M+</span></p>
             <div class="hero__cta">
               <a class="btn btn--primary" href="#holdings">Browse featured</a>
               <a class="btn btn--ghost" href="#inquire">Request access</a>
@@ -68,9 +69,9 @@
                 <span class="stat__value" id="hero-count">27</span>
                 <span class="stat__label">Featured here</span>
               </div>
-              <div class="stat">
-                <span class="stat__value">Private</span>
-                <span class="stat__label">Inquiry only</span>
+              <div class="stat stat--worth">
+                <span class="stat__value">$5M+</span>
+                <span class="stat__label">Portfolio worth</span>
               </div>
             </div>
           </div>
@@ -92,6 +93,7 @@
             </p>
             <div class="holdings__bar">
               <span class="holdings__chip holdings__chip--signal">2,500+ owned</span>
+              <span class="holdings__chip">Portfolio worth $5M+</span>
             </div>
           </header>
           <div class="holdings__panel">
@@ -121,6 +123,6 @@
       </footer>
     </div>
 
-    <script type="module" src="js/vault.js"></script>
+    <script type="module" src="js/vault.js?v=4"></script>
   </body>
 </html>

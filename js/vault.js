@@ -1,4 +1,4 @@
-import { domains, displayName, formatValue } from "./domains.js";
+import { domains, displayName, shortName } from "./domains.js";
 
 const total = domains.length;
 const grid = document.querySelector("#holdings-grid");
@@ -8,7 +8,7 @@ const holdingsEl = document.querySelector(".holdings");
 let openIndex = null;
 
 function tickerItemHTML(d) {
-  return `<span class="ticker__item"><span class="ticker__name">${displayName(d.name)}</span><span class="ticker__value">${formatValue(d.value)}</span></span>`;
+  return `<span class="ticker__item"><span class="ticker__name">${displayName(d.name)}</span></span>`;
 }
 
 function buildTickers() {
@@ -68,10 +68,9 @@ function rowHTML(d, i) {
       <div class="row__view">
         <span class="row__index">${String(i + 1).padStart(2, "0")}</span>
         <div class="row__main">
-          <h3 class="row__name">${displayName(d.name)}</h3>
-          <span class="row__tld">.${displayName(d.tld)}</span>
+          <h3 class="row__name">${displayName(shortName(d.name))}</h3>
+          <span class="row__tld">.${d.tld}</span>
         </div>
-        <span class="row__value">${formatValue(d.value)}</span>
         <button type="button" class="row__inquire" aria-label="Inquire about ${displayName(d.name)}">
           Inquire
         </button>
@@ -151,7 +150,6 @@ function openInquire(index) {
     const body = encodeURIComponent(
       [
         `Domain: ${d.name}`,
-        `Portfolio mark: ${formatValue(d.value)}`,
         "",
         `Name: ${name}`,
         `Email: ${email}`,
