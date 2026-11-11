@@ -1,4 +1,5 @@
 const TO = "inquire@cyberequities.com";
+const SITE = "https://cyberequities.com";
 
 function bad(res, status, error) {
   res.statusCode = status;
@@ -6,10 +7,10 @@ function bad(res, status, error) {
   res.end(JSON.stringify({ ok: false, error }));
 }
 
-function ok(res) {
+function ok(res, extra = {}) {
   res.statusCode = 200;
   res.setHeader("Content-Type", "application/json");
-  res.end(JSON.stringify({ ok: true }));
+  res.end(JSON.stringify({ ok: true, ...extra }));
 }
 
 function readBody(req) {
@@ -31,6 +32,10 @@ function readBody(req) {
     });
     req.on("error", reject);
   });
+}
+
+function isTruthySuccess(data) {
+  return data && (data.success === true || data.success === "true");
 }
 
 module.exports = async (req, res) => {
@@ -98,25 +103,74 @@ module.exports = async (req, res) => {
     message ? `Message:\n${message}` : null,
   ].filter(Boolean);
 
+  // Prefer Resend when configured; otherwise FormSubmit
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const upstream = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: process.env.RESEND_FROM || "CyberEquities <onboarding@resend.dev>",
+          to: [TO],
+          reply_to: email,
+          subject,
+          text: lines.join("\n"),
+        }),
+      });
+      const data = await upstream.json().catch(() => ({}));
+      if (!upstream.ok) {
+        bad(res, 502, data.message || "Could not send right now. Try again.");
+        return;
+      }
+      ok(res);
+      return;
+    } catch {
+      bad(res, 502, "Could not send right now. Try again.");
+      return;
+    }
+  }
+
   try {
-    const upstream = await fetch(`https://formsubmit.co/ajax/${TO}`, {
+    const upstream = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(TO)}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
+        Origin: SITE,
+        Referer: `${SITE}/`,
       },
       body: JSON.stringify({
         name,
         email,
         _replyto: email,
         _subject: subject,
+        _template: "table",
         message: lines.join("\n"),
       }),
     });
 
     const data = await upstream.json().catch(() => ({}));
-    if (!upstream.ok) {
-      bad(res, 502, data.message || "Could not send right now. Try again.");
+    const msg = String(data.message || "");
+
+    if (!upstream.ok || data.success === false || data.success === "false") {
+      if (/activat/i.test(msg)) {
+        bad(
+          res,
+          503,
+          "Inbox setup pending: open inquire@cyberequities.com and click FormSubmit’s Activate Form link, then try again."
+        );
+        return;
+      }
+      bad(res, 502, msg || "Could not send right now. Try again.");
+      return;
+    }
+
+    if (!isTruthySuccess(data) && !msg.toLowerCase().includes("thank")) {
+      // Some FormSubmit responses only return a thank-you string
+      bad(res, 502, msg || "Could not send right now. Try again.");
       return;
     }
 
